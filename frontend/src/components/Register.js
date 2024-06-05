@@ -19,7 +19,7 @@ function Register() {
             });
             setMessage(response.data.message);
         } catch (error) {
-            console.error('Error during registration:', error); // Логирование ошибки для отладки
+            console.error('Registration failed:', error);
             setMessage('Registration failed: ' + (error.response?.data?.error || error.message));
         }
     };
