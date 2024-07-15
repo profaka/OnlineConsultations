@@ -1,31 +1,14 @@
-# Используем базовый образ Node.js для разработки
-FROM node:14 AS build-stage
-
-# Устанавливаем рабочую директорию
+# Stage 1: Build the React app
+FROM node:16-alpine as build-stage
 WORKDIR /app
-
-# Копируем package.json и package-lock.json
-COPY package*.json ./
-
-# Устанавливаем зависимости
+COPY package.json ./
 RUN npm install
-
-# Копируем остальные файлы
 COPY . .
-
-# Сборка приложения
 RUN npm run build
 
-# Используем базовый образ Nginx для сервировки статических файлов
+# Stage 2: Serve the React app with Nginx
 FROM nginx:alpine
-
-# Копируем кастомную конфигурацию Nginx
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY default.conf /etc/nginx/conf.d/default.conf
-
-# Копируем статические файлы
 COPY --from=build-stage /app/build /usr/share/nginx/html
-
+COPY nginx.conf /etc/nginx/nginx.conf
 EXPOSE 80
-
 CMD ["nginx", "-g", "daemon off;"]

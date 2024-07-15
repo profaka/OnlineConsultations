@@ -25,7 +25,34 @@ services:
       - "5432:5432"
     volumes:
       - auth-db-data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+
+  consultation-service:
+    build: ./consultation-service
+    ports:
+      - "8001:8001"
+    environment:
+      - DB_HOST=consultation-db
+      - DB_USER=user
+      - DB_PASSWORD=password
+      - DB_NAME=consultation_db
+      - DB_PORT=5432
+    depends_on:
+      - consultation-db
+    networks:
+      - app-network
+
+  consultation-db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: consultation_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - consultation-db-data:/var/lib/postgresql/data
     networks:
       - app-network
 
@@ -38,20 +65,23 @@ services:
       - "5050:80"
     depends_on:
       - auth-db
+      - consultation-db
     networks:
       - app-network
 
   frontend:
     build: ./frontend
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - auth-service
+      - consultation-service
     networks:
       - app-network
 
 volumes:
   auth-db-data:
+  consultation-db-data:
 
 networks:
   app-network:

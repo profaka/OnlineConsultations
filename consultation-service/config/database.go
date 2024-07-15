@@ -1,7 +1,7 @@
 package config
 
 import (
-	"auth-service/models"
+	"consultation-service/models"
 	"log"
 	"time"
 
@@ -19,7 +19,7 @@ func InitDB() {
 		DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if err == nil {
 			log.Println("Connected to database")
-			err = DB.AutoMigrate(&models.User{})
+			err = DB.AutoMigrate(&models.Booking{}, &models.Consultation{})
 			if err != nil {
 				log.Fatalf("Failed to migrate database: %v", err)
 			} else {
