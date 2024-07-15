@@ -11,5 +11,8 @@ func ConsultationRoutes(r *gin.Engine) {
 		consultationGroup.POST("/", controllers.CreateConsultation)
 		consultationGroup.GET("/", controllers.GetConsultations)
 		consultationGroup.POST("/book", controllers.BookConsultation)
+		consultationGroup.GET("/bookings", controllers.GetBookings)             // Новый маршрут для получения бронирований
+		consultationGroup.PUT("/bookings/:id", controllers.UpdateBookingStatus) // Новый маршрут для обновления статуса бронирования
+
 	}
 }
