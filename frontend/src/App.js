@@ -1,38 +1,34 @@
-import React, { useContext } from 'react';
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
-import { AuthContext, AuthProvider } from './components/AuthContext';
-import Login from './components/Login';
-import Register from './components/Register';
-import ConsultationsList from './components/ConsultationsList';
-import CreateConsultation from './components/CreateConsultation';
-import BookConsultation from './components/BookConsultation';
-import PrivateRoute from './components/PrivateRoute';
-import Home from './components/Home';
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import Login from './components/Auth/Login';
+import Register from './components/Auth/Register';
+import ConsultationList from './components/Consultations/ConsultationList';
+import ConsultationDetail from './components/Consultations/ConsultationDetail';
+import CreateConsultation from './components/Consultations/CreateConsultation';
+import BookConsultation from './components/Consultations/BookConsultation';
+import BookingList from './components/Bookings/BookingList';
+import BookingDetail from './components/Bookings/BookingDetail';
+import Navbar from './components/Navbar';
+import PrivateRoute from './routes';
 
 function App() {
-    const { isAuthenticated } = useContext(AuthContext);
-
     return (
         <Router>
+            <Navbar />
             <Switch>
                 <Route path="/login" component={Login} />
                 <Route path="/register" component={Register} />
-                <PrivateRoute path="/consultations" component={ConsultationsList} />
+                <PrivateRoute path="/consultations" component={ConsultationList} />
+                <PrivateRoute path="/consultation/:id" component={ConsultationDetail} />
                 <PrivateRoute path="/create-consultation" component={CreateConsultation} />
                 <PrivateRoute path="/book-consultation" component={BookConsultation} />
-                <PrivateRoute path="/home" component={Home} />
-                <Redirect from="/" to={isAuthenticated ? "/home" : "/login"} />
+                <PrivateRoute path="/bookings" component={BookingList} />
+                <PrivateRoute path="/booking/:id" component={BookingDetail} />
+                <PrivateRoute exact path="/" component={ConsultationList} />
+
             </Switch>
         </Router>
     );
 }
 
-function RootApp() {
-    return (
-        <AuthProvider>
-            <App />
-        </AuthProvider>
-    );
-}
-
-export default RootApp;
+export default App;

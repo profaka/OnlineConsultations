@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from './api';
+import axios from 'axios';
 
 function CreateConsultation() {
     const [title, setTitle] = useState('');
@@ -11,16 +11,21 @@ function CreateConsultation() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await api.post('/consultations', {
+            const token = localStorage.getItem('token');
+            const response = await axios.post('http://localhost:8001/consultations', {
                 title,
                 description,
                 price,
                 duration
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
             setMessage('Consultation created successfully');
         } catch (error) {
-            console.error('Error creating consultation:', error);
-            setMessage('Error creating consultation: ' + (error.response?.data?.error || error.message));
+            console.error('Failed to create consultation:', error);
+            setMessage('Failed to create consultation');
         }
     };
 
@@ -34,15 +39,15 @@ function CreateConsultation() {
                 </div>
                 <div>
                     <label>Description:</label>
-                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} required />
+                    <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} required />
                 </div>
                 <div>
                     <label>Price:</label>
-                    <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
+                    <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} required />
                 </div>
                 <div>
-                    <label>Duration (minutes):</label>
-                    <input type="number" value={duration} onChange={(e) => setDuration(e.target.value)} required />
+                    <label>Duration:</label>
+                    <input type="text" value={duration} onChange={(e) => setDuration(e.target.value)} required />
                 </div>
                 <button type="submit">Create</button>
             </form>

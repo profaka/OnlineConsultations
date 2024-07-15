@@ -1,15 +1,12 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Route, Redirect } from 'react-router-dom';
-import { AuthContext } from './AuthContext';
 
-const PrivateRoute = ({ component: Component, ...rest }) => {
-    const { isAuthenticated } = useContext(AuthContext);
-
+function PrivateRoute({ component: Component, ...rest }) {
     return (
         <Route
             {...rest}
-            render={props =>
-                isAuthenticated ? (
+            render={(props) =>
+                localStorage.getItem('token') ? (
                     <Component {...props} />
                 ) : (
                     <Redirect to="/login" />
@@ -17,6 +14,6 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
             }
         />
     );
-};
+}
 
 export default PrivateRoute;
