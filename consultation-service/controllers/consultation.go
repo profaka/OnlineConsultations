@@ -56,28 +56,43 @@ func BookConsultation(c *gin.Context) {
 		return
 	}
 
+	var bookingRequest struct {
+		ConsultantID  uint      `json:"ConsultantID"`
+		ScheduledTime time.Time `json:"ScheduledTime"`
+	}
+
+	if err := c.ShouldBindJSON(&bookingRequest); err != nil {
+		fmt.Println("Error binding JSON:", err) // Логируем ошибку
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	if role != "client" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Only clients can book consultations"})
 		return
 	}
 
-	var booking models.Booking
-	if err := c.ShouldBindJSON(&booking); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var consultation models.Consultation
+	if err := config.DB.First(&consultation, bookingRequest.ConsultantID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Consultation not found"})
 		return
 	}
 
-	booking.ClientID = userID
-	booking.Status = "pending"
-	booking.CreatedAt = time.Now()
-	booking.UpdatedAt = time.Now()
+	newBooking := models.Booking{
+		ConsultationID: bookingRequest.ConsultantID,
+		ClientID:       userID,
+		ScheduledAt:    bookingRequest.ScheduledTime,
+		Status:         "pending",
+		CreatedAt:      time.Now(),
+		UpdatedAt:      time.Now(),
+	}
 
-	if err := config.DB.Create(&booking).Error; err != nil {
+	if err := config.DB.Create(&newBooking).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Booking created successfully", "booking": booking})
+	c.JSON(http.StatusOK, gin.H{"message": "Booking created successfully", "booking": newBooking})
 }
 
 func GetBookings(c *gin.Context) {

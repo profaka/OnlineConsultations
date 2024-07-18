@@ -1,21 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
+import { useHistory } from 'react-router-dom';
+import { AuthContext } from '../AuthContext';
 
 function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
+    const history = useHistory();
+    const { setUser } = useContext(AuthContext);
 
-    const handleSubmit = async (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:8000/auth/login', {
                 email,
-                password,
+                password
             });
-            const token = response.data.token;
+
+            const { token } = response.data;
             localStorage.setItem('token', token);
-            setMessage('Login successful');
+
+            // Получение данных пользователя из токена
+            const userPayload = JSON.parse(atob(token.split('.')[1]));
+            localStorage.setItem('user', JSON.stringify(userPayload));
+            setUser(userPayload);
+
+            history.push('/'); // Перенаправляем пользователя на главную страницу после успешного логина
         } catch (error) {
             console.error('Login failed:', error);
             setMessage('Login failed: ' + (error.response?.data?.error || error.message));
@@ -25,7 +36,7 @@ function Login() {
     return (
         <div>
             <h2>Login</h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={onSubmit}>
                 <div>
                     <label>Email:</label>
                     <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
