@@ -35,13 +35,16 @@ function Navbar() {
                     <Link to="/register">Register</Link>
                 </li>
                 <li>
-                    <Link to="/consultations">Consultations</Link>
+                    <Link to="/consultations/list">Consultations</Link>
                 </li>
                 <li>
                     <Link to="/create-consultation">Create Consultation</Link>
                 </li>
                 <li>
                     <Link to="/book-consultation">Book Consultation</Link>
+                </li>
+                <li>
+                    <Link to="/bookings">Book list</Link>
                 </li>
                 {userName && <li>Welcome, {userName}!</li>}
             </ul>

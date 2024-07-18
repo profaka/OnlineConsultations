@@ -10,7 +10,7 @@ function BookConsultation() {
         const token = localStorage.getItem('token');
         try {
             await axios.post(
-                'http://localhost:8001/bookings',
+                'http://localhost:8001/consultations/book',
                 { consultationId, date },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

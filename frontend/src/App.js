@@ -18,7 +18,7 @@ function App() {
             <Switch>
                 <Route path="/login" component={Login} />
                 <Route path="/register" component={Register} />
-                <PrivateRoute path="/consultations" component={ConsultationList} />
+                <PrivateRoute path="/consultations/list" component={ConsultationList} />
                 <PrivateRoute path="/consultation/:id" component={ConsultationDetail} />
                 <PrivateRoute path="/create-consultation" component={CreateConsultation} />
                 <PrivateRoute path="/book-consultation" component={BookConsultation} />

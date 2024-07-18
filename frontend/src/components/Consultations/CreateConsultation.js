@@ -8,21 +8,23 @@ function CreateConsultation() {
     const [duration, setDuration] = useState('');
     const [message, setMessage] = useState('');
 
-    const handleSubmit = async (e) => {
+    const onSubmit = async (e) => {
         e.preventDefault();
+        const token = localStorage.getItem('token');
         try {
-            const token = localStorage.getItem('token');
-            const response = await axios.post('http://localhost:8001/consultations', {
+            const response = await axios.post('http://localhost:8001/consultations/create', {
                 title,
                 description,
-                price,
-                duration
+                price: parseFloat(price), // Ensure price is sent as a number
+                duration: parseInt(duration), // Ensure duration is sent as a number
             }, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
             });
-            setMessage('Consultation created successfully');
+
+            setMessage(response.data.message);
         } catch (error) {
             console.error('Failed to create consultation:', error);
             setMessage('Failed to create consultation');
@@ -32,24 +34,24 @@ function CreateConsultation() {
     return (
         <div>
             <h2>Create Consultation</h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={onSubmit}>
                 <div>
                     <label>Title:</label>
                     <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
                 </div>
                 <div>
                     <label>Description:</label>
-                    <input type="text" value={description} onChange={(e) => setDescription(e.target.value)} required />
+                    <textarea value={description} onChange={(e) => setDescription(e.target.value)} required />
                 </div>
                 <div>
                     <label>Price:</label>
-                    <input type="text" value={price} onChange={(e) => setPrice(e.target.value)} required />
+                    <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} required />
                 </div>
                 <div>
-                    <label>Duration:</label>
-                    <input type="text" value={duration} onChange={(e) => setDuration(e.target.value)} required />
+                    <label>Duration (minutes):</label>
+                    <input type="number" value={duration} onChange={(e) => setDuration(e.target.value)} required />
                 </div>
-                <button type="submit">Create</button>
+                <button type="submit">Create Consultation</button>
             </form>
             {message && <p>{message}</p>}
         </div>

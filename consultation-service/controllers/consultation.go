@@ -4,6 +4,7 @@ import (
 	"consultation-service/config"
 	"consultation-service/models"
 	"consultation-service/utils"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -11,14 +12,12 @@ import (
 )
 
 func CreateConsultation(c *gin.Context) {
-	// Извлечение информации из токена
 	userID, role, err := utils.GetUserIDAndRoleFromToken(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 		return
 	}
 
-	// Проверка роли пользователя
 	if role != "consultant" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Only consultants can create consultations"})
 		return
@@ -30,7 +29,6 @@ func CreateConsultation(c *gin.Context) {
 		return
 	}
 
-	// Использование ID пользователя из токена
 	consultation.ConsultantID = userID
 
 	if err := config.DB.Create(&consultation).Error; err != nil {
@@ -40,6 +38,7 @@ func CreateConsultation(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Consultation created successfully", "consultation": consultation})
 }
+
 func GetConsultations(c *gin.Context) {
 	var consultations []models.Consultation
 	if err := config.DB.Find(&consultations).Error; err != nil {
@@ -51,14 +50,12 @@ func GetConsultations(c *gin.Context) {
 }
 
 func BookConsultation(c *gin.Context) {
-	// Извлечение информации из токена
 	userID, role, err := utils.GetUserIDAndRoleFromToken(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 		return
 	}
 
-	// Проверка роли пользователя
 	if role != "client" {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Only clients can book consultations"})
 		return
@@ -70,7 +67,6 @@ func BookConsultation(c *gin.Context) {
 		return
 	}
 
-	// Использование ID клиента из токена
 	booking.ClientID = userID
 	booking.Status = "pending"
 	booking.CreatedAt = time.Now()
@@ -93,24 +89,21 @@ func GetBookings(c *gin.Context) {
 
 	var bookings []models.Booking
 	if role == "client" {
+		fmt.Println("User ID:", userID)
 		if err := config.DB.Where("client_id = ?", userID).Find(&bookings).Error; err != nil {
+			fmt.Println("Error:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		fmt.Println("Bookings:", bookings)
 	} else if role == "consultant" {
-		var consultations []models.Consultation
-		if err := config.DB.Where("consultant_id = ?", userID).Find(&consultations).Error; err != nil {
+		fmt.Println("Consultant ID:", userID)
+		if err := config.DB.Where("consultation_id = ?", userID).Find(&bookings).Error; err != nil {
+			fmt.Println("Error:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		var consultationIDs []uint
-		for _, consultation := range consultations {
-			consultationIDs = append(consultationIDs, consultation.ID)
-		}
-		if err := config.DB.Where("consultation_id IN (?)", consultationIDs).Find(&bookings).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
+		fmt.Println("Bookings:", bookings)
 	} else {
 		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid role"})
 		return

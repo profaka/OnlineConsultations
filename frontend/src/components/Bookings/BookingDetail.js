@@ -41,7 +41,7 @@ function BookingDetail() {
 const handleApprove = async () => {
     const token = localStorage.getItem('token');
     try {
-        await axios.patch(`http://localhost:8001/bookings/${id}/approve`, {}, {
+        await axios.patch(`http://localhost:8001/consultations/bookings/${id}/approve`, {}, {
             headers: { Authorization: `Bearer ${token}` },
         });
         setBooking({ ...booking, status: 'approved' });

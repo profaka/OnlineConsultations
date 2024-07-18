@@ -2,40 +2,35 @@ package utils
 
 import (
 	"errors"
-	"strings"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"strings"
 )
 
-// Ваш секретный ключ
 var jwtKey = []byte("your_secret_key")
 
-// Структура, которая будет декодироваться из токена
 type Claims struct {
 	UserID uint   `json:"user_id"`
+	Email  string `json:"email"`
 	Role   string `json:"role"`
 	jwt.StandardClaims
 }
 
-// Функция для извлечения UserID и роли из токена
 func GetUserIDAndRoleFromToken(c *gin.Context) (uint, string, error) {
-	authHeader := c.GetHeader("Authorization")
-	if authHeader == "" {
-		return 0, "", errors.New("no token found")
-	}
+	tokenString := c.GetHeader("Authorization")
+	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
 
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-	claims := &Claims{}
-
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 
-	if err != nil || !token.Valid {
-		return 0, "", errors.New("invalid token")
+	if err != nil {
+		return 0, "", err
 	}
 
-	return claims.UserID, claims.Role, nil
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		return claims.UserID, claims.Role, nil
+	}
+
+	return 0, "", errors.New("invalid token")
 }
